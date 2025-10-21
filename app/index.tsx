@@ -16,17 +16,13 @@ const IndexRedirect: React.FC = () => {
 
   const checkInitialRoute = async () => {
     try {
-      // Check if onboarding was completed
       const onboardingCompleted = await AsyncStorage.getItem('@moodly_onboarding_completed');
 
       if (!onboardingCompleted) {
-        // First time user - show onboarding
         router.replace('/onboarding');
       } else if (!isAuthenticated) {
-        // Onboarding done but not logged in - show login
         router.replace('/login');
       } else {
-        // Logged in - show dashboard
         router.replace('/dashboard');
       }
     } catch (error) {

@@ -6,7 +6,7 @@ export type MoodTag = 'Workload' | 'Collaboration' | 'Recognition' | 'Autonomy' 
 
 export interface MoodEntry {
     id: string;
-    date: string; // ISO date string
+    date: string;
     mood: MoodLevel;
     tags: MoodTag[];
     timestamp: number;
@@ -31,7 +31,6 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [entries, setEntries] = useState<MoodEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Load entries from AsyncStorage on mount
     useEffect(() => {
         loadEntries();
     }, []);

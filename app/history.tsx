@@ -46,7 +46,6 @@ const HistoryScreen: React.FC = () => {
     return (
         <View className="flex-1 bg-white">
             <ScrollView className="flex-1" contentContainerClassName="pb-8">
-                {/* Header */}
                 <View className="mt-6 flex-row items-center px-6">
                     <TouchableOpacity onPress={() => router.back()} className="mr-4">
                         <Ionicons name="arrow-back" size={24} color="#0f172a" />
@@ -59,9 +58,7 @@ const HistoryScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* Statistics Cards */}
                 <View className="mt-6 flex-row px-6">
-                    {/* 30-day Average */}
                     <View className="mr-3 flex-1 rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
                         <View className="mb-2 flex-row items-center">
                             <Ionicons name="calendar-outline" size={16} color="#64748b" />
@@ -75,7 +72,6 @@ const HistoryScreen: React.FC = () => {
                         </Text>
                     </View>
 
-                    {/* 7-day Trend */}
                     <View className="ml-3 flex-1 rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
                         <View className="mb-2 flex-row items-center">
                             <Ionicons name="trending-up-outline" size={16} color="#64748b" />
@@ -87,7 +83,6 @@ const HistoryScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* This Week */}
                 {thisWeek.length > 0 && (
                     <View className="mt-8 px-6">
                         <Text className="mb-4 font-inter-semibold text-base text-slate-900">This week</Text>
@@ -120,7 +115,6 @@ const HistoryScreen: React.FC = () => {
                     </View>
                 )}
 
-                {/* Last Week */}
                 {lastWeek.length > 0 && (
                     <View className="mt-6 px-6">
                         <Text className="mb-4 font-inter-semibold text-base text-slate-900">Last week</Text>
@@ -153,7 +147,6 @@ const HistoryScreen: React.FC = () => {
                     </View>
                 )}
 
-                {/* No Data */}
                 {entries.length === 0 && (
                     <View className="mt-20 items-center px-8">
                         <Ionicons name="time-outline" size={64} color="#cbd5e1" />
@@ -167,7 +160,6 @@ const HistoryScreen: React.FC = () => {
                 )}
             </ScrollView>
 
-            {/* Bottom Navigation */}
             <View className="flex-row items-center justify-around border-t border-slate-200 py-4">
                 <TouchableOpacity
                     onPress={() => router.push('/dashboard')}

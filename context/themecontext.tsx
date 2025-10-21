@@ -6,9 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type ThemePreference = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
-  theme: ThemePreference; // user preference
+  theme: ThemePreference;
   setTheme: (theme: ThemePreference) => void;
-  colorScheme: 'light' | 'dark'; // resolved runtime scheme
+  colorScheme: 'light' | 'dark';
 }
 
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -19,7 +19,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const nativewind = useColorScheme();
   const [pref, setPref] = useState<ThemePreference>('system');
 
-  // Load persisted preference on mount
   useEffect(() => {
     (async () => {
       try {
@@ -28,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setPref(saved);
           nativewind.setColorScheme(saved);
         }
-      } catch {}
+      } catch { }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -37,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     async (t: ThemePreference) => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, t);
-      } catch {}
+      } catch { }
       setPref(t);
       nativewind.setColorScheme(t);
     },

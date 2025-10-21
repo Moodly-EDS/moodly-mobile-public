@@ -29,7 +29,6 @@ const CheckInScreen: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<MoodTag[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // If already checked in today, show success screen
   if (hasCheckedInToday()) {
     router.replace('/checkin-success');
     return null;
@@ -73,7 +72,6 @@ const CheckInScreen: React.FC = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-white">
       <ScrollView className="flex-1" contentContainerClassName="pb-8">
-        {/* Header */}
         <View className="mt-6 flex-row items-center justify-between px-6">
           <View>
             <Text className="font-inter-regular text-sm text-slate-500">Today&apos;s check-in</Text>
@@ -85,9 +83,7 @@ const CheckInScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Main Content Card */}
         <View className="mx-4 mt-8 rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
-          {/* Mood Selection */}
           <View>
             <Text className="mb-6 font-inter-semibold text-xl text-slate-900">
               How are you feeling today?
@@ -115,7 +111,6 @@ const CheckInScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Tag Selection */}
           <View className="mt-8">
             <Text className="mb-2 font-inter-semibold text-lg text-slate-900">
               What&apos;s influencing your mood?
@@ -144,7 +139,6 @@ const CheckInScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Submit Button */}
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={!canSubmit || isSubmitting}
@@ -161,7 +155,6 @@ const CheckInScreen: React.FC = () => {
             </Text>
           )}
 
-          {/* Privacy Notice */}
           <View className="mt-6 flex-row rounded-xl bg-slate-50 p-4">
             <Ionicons name="shield-checkmark-outline" size={20} color="#64748b" />
             <View className="ml-3 flex-1">
@@ -177,7 +170,6 @@ const CheckInScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Bottom Navigation */}
         <View className="mt-8 flex-row items-center justify-around border-t border-slate-200 pt-4">
           <TouchableOpacity className="items-center py-2 px-4">
             <Ionicons name="home" size={24} color="#2563eb" />

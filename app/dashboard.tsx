@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useMood, MoodLevel, MoodTag } from '@context/moodcontext';
+import { useAuth } from '@context/authcontext';
 
 const moodOptions: { level: MoodLevel; emoji: string; label: string }[] = [
   { level: 1, emoji: '😞', label: 'Very bad' },
@@ -24,15 +25,20 @@ const tagOptions: MoodTag[] = [
 
 const CheckInScreen: React.FC = () => {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const { addEntry, hasCheckedInToday } = useMood();
   const [selectedMood, setSelectedMood] = useState<MoodLevel | null>(null);
   const [selectedTags, setSelectedTags] = useState<MoodTag[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (hasCheckedInToday()) {
-    router.replace('/checkin-success');
-    return null;
-  }
+  const isManager = user?.account_type === 'manager';
+  const alreadyCheckedIn = hasCheckedInToday();
+
+  useEffect(() => {
+    if (!isManager && alreadyCheckedIn) {
+      router.replace('/checkin-success');
+    }
+  }, [isManager, alreadyCheckedIn, router]);
 
   const toggleTag = (tag: MoodTag) => {
     if (selectedTags.includes(tag)) {
@@ -84,75 +90,98 @@ const CheckInScreen: React.FC = () => {
         </View>
 
         <View className="mx-4 mt-8 rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
-          <View>
-            <Text className="mb-6 font-inter-semibold text-xl text-slate-900">
-              How are you feeling today?
-            </Text>
-
-            <View className="mb-6 flex-row justify-between">
-              {moodOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.level}
-                  onPress={() => setSelectedMood(option.level)}
-                  className={`items-center rounded-2xl p-4 ${selectedMood === option.level
-                    ? 'bg-blue-50 border-2 border-blue-600'
-                    : 'bg-white border-2 border-slate-200'
-                    }`}>
-                  <Text className="mb-2 text-4xl">{option.emoji}</Text>
-                  <Text className="font-inter-regular text-xs text-slate-600">
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {isManager ? (
+            <View>
+              <Text className="mb-4 font-inter-semibold text-xl text-slate-900">
+                Manager Dashboard
+              </Text>
+              <View className="rounded-xl bg-blue-50 p-4 mb-4">
+                <Ionicons name="information-circle" size={24} color="#2563eb" />
+                <Text className="mt-2 font-inter-medium text-sm text-blue-900">
+                  As a manager, you can view team statistics in the History tab.
+                </Text>
+                <Text className="mt-1 font-inter-regular text-xs text-blue-700">
+                  Managers cannot submit mood check-ins.
+                </Text>
+              </View>
             </View>
+          ) : (
+            <View>
+              <Text className="mb-6 font-inter-semibold text-xl text-slate-900">
+                How are you feeling today?
+              </Text>
 
-            <Text className="mb-2 text-center font-inter-regular text-xs text-slate-500">
-              Press 1-5 on your keyboard for quick selection
-            </Text>
-          </View>
-
-          <View className="mt-8">
-            <Text className="mb-2 font-inter-semibold text-lg text-slate-900">
-              What&apos;s influencing your mood?
-            </Text>
-
-            <View className="mb-4 flex-row flex-wrap">
-              {tagOptions.map((tag) => (
-                <TouchableOpacity
-                  key={tag}
-                  onPress={() => toggleTag(tag)}
-                  className={`mb-3 mr-3 rounded-full px-6 py-3 ${selectedTags.includes(tag)
-                    ? 'bg-blue-600'
-                    : 'bg-slate-100'
-                    }`}>
-                  <Text
-                    className={`font-inter-medium text-sm ${selectedTags.includes(tag) ? 'text-white' : 'text-slate-700'
+              <View className="mb-6 flex-row justify-between">
+                {moodOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.level}
+                    onPress={() => setSelectedMood(option.level)}
+                    className={`items-center rounded-2xl p-4 ${selectedMood === option.level
+                      ? 'bg-blue-50 border-2 border-blue-600'
+                      : 'bg-white border-2 border-slate-200'
                       }`}>
-                    {tag}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text className="mb-2 text-4xl">{option.emoji}</Text>
+                    <Text className="font-inter-regular text-xs text-slate-600">
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text className="mb-2 text-center font-inter-regular text-xs text-slate-500">
+                Press 1-5 on your keyboard for quick selection
+              </Text>
             </View>
+          )}
 
-            <Text className="font-inter-regular text-xs text-slate-500">
-              {selectedTags.length}/2 selected • Optional—helps understand patterns
-            </Text>
-          </View>
+          {!isManager && (
+            <View className="mt-8">
+              <Text className="mb-2 font-inter-semibold text-lg text-slate-900">
+                What&apos;s influencing your mood?
+              </Text>
 
-          <TouchableOpacity
-            onPress={handleSubmit}
-            disabled={!canSubmit || isSubmitting}
-            className={`mt-8 rounded-full py-4 ${canSubmit && !isSubmitting ? 'bg-blue-600' : 'bg-slate-300'
-              }`}>
-            <Text className="text-center font-inter-semibold text-base text-white">
-              {isSubmitting ? 'Submitting...' : 'Submit check-in'}
-            </Text>
-          </TouchableOpacity>
+              <View className="mb-4 flex-row flex-wrap">
+                {tagOptions.map((tag) => (
+                  <TouchableOpacity
+                    key={tag}
+                    onPress={() => toggleTag(tag)}
+                    className={`mb-3 mr-3 rounded-full px-6 py-3 ${selectedTags.includes(tag)
+                      ? 'bg-blue-600'
+                      : 'bg-slate-100'
+                      }`}>
+                    <Text
+                      className={`font-inter-medium text-sm ${selectedTags.includes(tag) ? 'text-white' : 'text-slate-700'
+                        }`}>
+                      {tag}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-          {canSubmit && (
-            <Text className="mt-2 text-center font-inter-regular text-xs text-slate-500">
-              Press Enter to submit
-            </Text>
+              <Text className="font-inter-regular text-xs text-slate-500">
+                {selectedTags.length}/2 selected • Optional—helps understand patterns
+              </Text>
+            </View>
+          )}
+
+          {!isManager && (
+            <>
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={!canSubmit || isSubmitting}
+                className={`mt-8 rounded-full py-4 ${canSubmit && !isSubmitting ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}>
+                <Text className="text-center font-inter-semibold text-base text-white">
+                  {isSubmitting ? 'Submitting...' : 'Submit check-in'}
+                </Text>
+              </TouchableOpacity>
+
+              {canSubmit && (
+                <Text className="mt-2 text-center font-inter-regular text-xs text-slate-500">
+                  Press Enter to submit
+                </Text>
+              )}
+            </>
           )}
 
           <View className="mt-6 flex-row rounded-xl bg-slate-50 p-4">
@@ -184,7 +213,10 @@ const CheckInScreen: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => router.push('/profile')}
+            onPress={async () => {
+              await logout();
+              router.replace('/login');
+            }}
             className="items-center py-2 px-4">
             <Ionicons name="log-out-outline" size={24} color="#94a3b8" />
             <Text className="mt-1 font-inter-regular text-xs text-slate-500">Sign out</Text>

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useMood } from '@context/moodcontext';
+import { useAuth } from '@context/authcontext';
 
 const moodEmojis: Record<number, string> = {
     1: '😞',
@@ -22,6 +23,7 @@ const moodLabels: Record<number, string> = {
 
 const HistoryScreen: React.FC = () => {
     const router = useRouter();
+    const { logout } = useAuth();
     const { entries, get30DayAverage, get7DayTrend, getEntriesByWeek } = useMood();
 
     const average = get30DayAverage();
@@ -174,7 +176,10 @@ const HistoryScreen: React.FC = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => router.push('/profile')}
+                    onPress={async () => {
+                        await logout();
+                        router.replace('/login');
+                    }}
                     className="items-center py-2 px-4">
                     <Ionicons name="log-out-outline" size={24} color="#94a3b8" />
                     <Text className="mt-1 font-inter-regular text-xs text-slate-500">Sign out</Text>

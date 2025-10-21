@@ -1,8 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabaseService } from '../services/supabaseService';
+import { Report } from '../services/supabase';
+import {
+    MoodLevel,
+    MoodTag,
+    supabaseToMoodLevel,
+    supabaseToMoodTags,
+    moodLevelToSupabase,
+    moodTagsToSupabase,
+} from '../services/mappers';
 
-export type MoodLevel = 1 | 2 | 3 | 4 | 5;
-export type MoodTag = 'Workload' | 'Collaboration' | 'Recognition' | 'Autonomy' | 'Focus' | 'Personal' | 'Other';
+export { MoodLevel, MoodTag };
 
 export interface MoodEntry {
     id: string;
@@ -20,12 +28,22 @@ interface MoodContextType {
     get30DayAverage: () => number;
     get7DayTrend: () => 'Rising' | 'Falling' | 'Stable';
     getEntriesByWeek: () => { thisWeek: MoodEntry[]; lastWeek: MoodEntry[] };
+    refreshEntries: () => Promise<void>;
     loading: boolean;
 }
 
 const MoodContext = createContext<MoodContextType | undefined>(undefined);
 
-const STORAGE_KEY = '@moodly_entries';
+// Helper to convert Supabase report to MoodEntry
+const supabaseReportToMoodEntry = (report: Report): MoodEntry => {
+    return {
+        id: report.id,
+        date: report.date,
+        mood: supabaseToMoodLevel(report.mood),
+        tags: supabaseToMoodTags(report.reasons),
+        timestamp: new Date(report.date).getTime(),
+    };
+};
 
 export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [entries, setEntries] = useState<MoodEntry[]>([]);
@@ -37,10 +55,9 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const loadEntries = async () => {
         try {
-            const storedEntries = await AsyncStorage.getItem(STORAGE_KEY);
-            if (storedEntries) {
-                setEntries(JSON.parse(storedEntries));
-            }
+            const reports = await supabaseService.getMyReports();
+            const moodEntries = reports.map(supabaseReportToMoodEntry);
+            setEntries(moodEntries);
         } catch (error) {
             console.error('Failed to load mood entries:', error);
         } finally {
@@ -48,26 +65,19 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    const saveEntries = async (newEntries: MoodEntry[]) => {
-        try {
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-            setEntries(newEntries);
-        } catch (error) {
-            console.error('Failed to save mood entries:', error);
-        }
-    };
-
     const addEntry = async (mood: MoodLevel, tags: MoodTag[]) => {
-        const now = new Date();
-        const newEntry: MoodEntry = {
-            id: `${now.getTime()}`,
-            date: now.toISOString().split('T')[0],
-            mood,
-            tags,
-            timestamp: now.getTime(),
-        };
-        const updatedEntries = [newEntry, ...entries];
-        await saveEntries(updatedEntries);
+        try {
+            const supabaseMood = moodLevelToSupabase(mood);
+            const supabaseReasons = moodTagsToSupabase(tags);
+
+            const report = await supabaseService.createReport(supabaseMood, supabaseReasons);
+            const newEntry = supabaseReportToMoodEntry(report);
+
+            setEntries([newEntry, ...entries]);
+        } catch (error) {
+            console.error('Failed to add mood entry:', error);
+            throw error;
+        }
     };
 
     const hasCheckedInToday = (): boolean => {
@@ -78,6 +88,11 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const getTodayEntry = (): MoodEntry | undefined => {
         const today = new Date().toISOString().split('T')[0];
         return entries.find(entry => entry.date === today);
+    };
+
+    const refreshEntries = async () => {
+        setLoading(true);
+        await loadEntries();
     };
 
     const get30DayAverage = (): number => {
@@ -138,6 +153,7 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 get30DayAverage,
                 get7DayTrend,
                 getEntriesByWeek,
+                refreshEntries,
                 loading,
             }}>
             {children}

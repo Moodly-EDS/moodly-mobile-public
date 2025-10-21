@@ -20,10 +20,27 @@ const LoginScreen: React.FC = () => {
   const [role, setRole] = useState<UserRole>('employee');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    login();
-    router.replace('/dashboard');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter email and password');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await login(email, password);
+      router.replace('/dashboard');
+    } catch (err) {
+      setError('Invalid email or password');
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -99,14 +116,29 @@ const LoginScreen: React.FC = () => {
               Forgot password?
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogin} className="mb-6 w-full rounded-full bg-blue-600 py-4">
-            <Text className="text-center font-inter-semibold text-base text-white">Sign in</Text>
-          </TouchableOpacity>
-          <View className="rounded-xl bg-slate-50 p-4">
-            <Text className="text-center font-inter-regular text-xs text-slate-600">
-              Demo mode: Use any email/password to continue
+
+          {error ? (
+            <View className="mb-4 w-full rounded-xl bg-red-50 p-3">
+              <Text className="text-center font-inter-medium text-sm text-red-600">{error}</Text>
+            </View>
+          ) : null}
+
+          <TouchableOpacity
+            onPress={handleLogin}
+            disabled={isLoading}
+            className={`mb-6 w-full rounded-full py-4 ${isLoading ? 'bg-blue-400' : 'bg-blue-600'}`}>
+            <Text className="text-center font-inter-semibold text-base text-white">
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Text>
-          </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/register')}
+            className="mb-4 w-full">
+            <Text className="text-center font-inter-medium text-sm text-slate-600">
+              Don&apos;t have an account? <Text className="text-blue-600">Sign up</Text>
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/onboarding')} className="mt-6 flex-row items-center">
             <Ionicons name="arrow-back" size={16} color="#64748b" />
             <Text className="ml-2 font-inter-medium text-sm text-slate-600">Back to home</Text>

@@ -22,11 +22,11 @@ const CheckInSuccessScreen: React.FC = () => {
             </View>
 
             <Text className="mb-2 text-center font-inter-bold text-2xl text-slate-900">
-                Already submitted today
+                Check-in submitted!
             </Text>
 
             <Text className="mb-8 text-center font-inter-regular text-base leading-6 text-slate-600">
-                Your response has been recorded anonymously. Thank you for checking in.
+                Your response has been recorded anonymously. Feel free to check in again anytime today.
             </Text>
 
             <TouchableOpacity

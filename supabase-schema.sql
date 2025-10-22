@@ -51,8 +51,7 @@ CREATE TABLE public.reports (
     mood public.mood_level NOT NULL,
     reasons TEXT[] NOT NULL DEFAULT '{}',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT unique_user_date UNIQUE (user_id, date)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Enable Row Level Security

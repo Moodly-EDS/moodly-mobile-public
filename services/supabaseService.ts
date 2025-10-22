@@ -134,7 +134,7 @@ class SupabaseService {
             .from('reports')
             .select('*')
             .eq('user_id', user.id)
-            .order('date', { ascending: false });
+            .order('created_at', { ascending: false });
 
         if (error) {
             console.error('❌ getMyReports error:', error);
@@ -144,26 +144,9 @@ class SupabaseService {
         return data || [];
     }
 
-    async hasReportToday(): Promise<boolean> {
+    async getTodayReports(): Promise<Report[]> {
         const user = await this.getCurrentUser();
-        if (!user) return false;
-
-        const today = new Date().toISOString().split('T')[0];
-
-        const { data, error } = await supabase
-            .from('reports')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('date', today)
-            .maybeSingle();
-
-        if (error) return false;
-        return data !== null;
-    }
-
-    async getTodayReport(): Promise<Report | null> {
-        const user = await this.getCurrentUser();
-        if (!user) return null;
+        if (!user) return [];
 
         const today = new Date().toISOString().split('T')[0];
 
@@ -172,10 +155,10 @@ class SupabaseService {
             .select('*')
             .eq('user_id', user.id)
             .eq('date', today)
-            .maybeSingle();
+            .order('created_at', { ascending: false });
 
-        if (error) return null;
-        return data;
+        if (error) return [];
+        return data || [];
     }
 
     async updateReport(id: string, mood: MoodLevel, reasons: string[]): Promise<Report> {

@@ -49,7 +49,7 @@ const tagOptions: MoodTag[] = [
 const CheckInScreen: React.FC = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const { addEntry, hasCheckedInToday } = useMood();
+  const { addEntry } = useMood();
   const [selectedMood, setSelectedMood] = useState<MoodLevel | null>(null);
   const [selectedTags, setSelectedTags] = useState<MoodTag[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +57,6 @@ const CheckInScreen: React.FC = () => {
   const [statsLoading, setStatsLoading] = useState(false);
 
   const isManager = user?.account_type === 'manager';
-  const alreadyCheckedIn = hasCheckedInToday();
 
   useEffect(() => {
     if (isManager) {
@@ -76,12 +75,6 @@ const CheckInScreen: React.FC = () => {
       setStatsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!isManager && alreadyCheckedIn) {
-      router.replace('/checkin-success');
-    }
-  }, [isManager, alreadyCheckedIn, router]);
 
   const toggleTag = (tag: MoodTag) => {
     if (selectedTags.includes(tag)) {

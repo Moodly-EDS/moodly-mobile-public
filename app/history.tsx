@@ -42,6 +42,18 @@ const HistoryScreen: React.FC = () => {
         }
     };
 
+    const formatDateTime = (entry: typeof entries[0]) => {
+        // Si on a un created_at, l'utiliser pour afficher l'heure
+        const dateStr = formatDate(entry.date);
+        // On peut ajouter l'heure si disponible via timestamp
+        const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+        return { dateStr, time };
+    };
+
     return (
         <View className="flex-1 bg-white">
             <ScrollView className="flex-1" contentContainerClassName="pb-32">
@@ -82,64 +94,80 @@ const HistoryScreen: React.FC = () => {
                 {thisWeek.length > 0 && (
                     <View className="mt-8 px-6">
                         <Text className="mb-4 font-inter-semibold text-base text-slate-900">This week</Text>
-                        {thisWeek.map((entry) => (
-                            <View
-                                key={entry.id}
-                                className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
-                                <View className="flex-row items-center">
-                                    <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
-                                    <View>
-                                        <Text className="font-inter-medium text-base text-slate-900">
-                                            {moodLabels[entry.mood]}
-                                        </Text>
-                                        <Text className="font-inter-regular text-sm text-slate-500">
-                                            {formatDate(entry.date)}
-                                        </Text>
+                        {thisWeek.map((entry) => {
+                            const { dateStr, time } = formatDateTime(entry);
+                            return (
+                                <View
+                                    key={entry.id}
+                                    className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+                                    <View className="flex-row items-center flex-1">
+                                        <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
+                                        <View className="flex-1">
+                                            <Text className="font-inter-medium text-base text-slate-900">
+                                                {moodLabels[entry.mood]}
+                                            </Text>
+                                            <View className="flex-row items-center">
+                                                <Text className="font-inter-regular text-sm text-slate-500">
+                                                    {dateStr}
+                                                </Text>
+                                                <Text className="font-inter-regular text-xs text-slate-400 ml-2">
+                                                    • {time}
+                                                </Text>
+                                            </View>
+                                            <View className="mt-2 flex-row flex-wrap">
+                                                {entry.tags.map((tag, index) => (
+                                                    <View
+                                                        key={index}
+                                                        className="mr-2 mb-1 rounded-full bg-slate-100 px-3 py-1">
+                                                        <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </View>
                                     </View>
                                 </View>
-                                <View className="flex-row">
-                                    {entry.tags.map((tag, index) => (
-                                        <View
-                                            key={index}
-                                            className="ml-2 rounded-full bg-slate-100 px-3 py-1">
-                                            <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </View>
                 )}
 
                 {lastWeek.length > 0 && (
                     <View className="mt-6 px-6">
                         <Text className="mb-4 font-inter-semibold text-base text-slate-900">Last week</Text>
-                        {lastWeek.map((entry) => (
-                            <View
-                                key={entry.id}
-                                className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
-                                <View className="flex-row items-center">
-                                    <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
-                                    <View>
-                                        <Text className="font-inter-medium text-base text-slate-900">
-                                            {moodLabels[entry.mood]}
-                                        </Text>
-                                        <Text className="font-inter-regular text-sm text-slate-500">
-                                            {formatDate(entry.date)}
-                                        </Text>
+                        {lastWeek.map((entry) => {
+                            const { dateStr, time } = formatDateTime(entry);
+                            return (
+                                <View
+                                    key={entry.id}
+                                    className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+                                    <View className="flex-row items-center flex-1">
+                                        <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
+                                        <View className="flex-1">
+                                            <Text className="font-inter-medium text-base text-slate-900">
+                                                {moodLabels[entry.mood]}
+                                            </Text>
+                                            <View className="flex-row items-center">
+                                                <Text className="font-inter-regular text-sm text-slate-500">
+                                                    {dateStr}
+                                                </Text>
+                                                <Text className="font-inter-regular text-xs text-slate-400 ml-2">
+                                                    • {time}
+                                                </Text>
+                                            </View>
+                                            <View className="mt-2 flex-row flex-wrap">
+                                                {entry.tags.map((tag, index) => (
+                                                    <View
+                                                        key={index}
+                                                        className="mr-2 mb-1 rounded-full bg-slate-100 px-3 py-1">
+                                                        <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </View>
                                     </View>
                                 </View>
-                                <View className="flex-row">
-                                    {entry.tags.map((tag, index) => (
-                                        <View
-                                            key={index}
-                                            className="ml-2 rounded-full bg-slate-100 px-3 py-1">
-                                            <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </View>
                 )}
 

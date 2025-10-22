@@ -24,8 +24,7 @@ export interface MoodEntry {
 interface MoodContextType {
     entries: MoodEntry[];
     addEntry: (mood: MoodLevel, tags: MoodTag[]) => Promise<void>;
-    hasCheckedInToday: () => boolean;
-    getTodayEntry: () => MoodEntry | undefined;
+    getTodayEntries: () => MoodEntry[];
     get30DayAverage: () => number;
     get7DayTrend: () => 'Rising' | 'Falling' | 'Stable';
     getEntriesByWeek: () => { thisWeek: MoodEntry[]; lastWeek: MoodEntry[] };
@@ -41,7 +40,7 @@ const supabaseReportToMoodEntry = (report: Report): MoodEntry => {
         date: report.date,
         mood: supabaseToMoodLevel(report.mood),
         tags: supabaseToMoodTags(report.reasons),
-        timestamp: new Date(report.date).getTime(),
+        timestamp: new Date(report.created_at).getTime(),
     };
 };
 
@@ -89,14 +88,9 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    const hasCheckedInToday = (): boolean => {
+    const getTodayEntries = (): MoodEntry[] => {
         const today = new Date().toISOString().split('T')[0];
-        return entries.some(entry => entry.date === today);
-    };
-
-    const getTodayEntry = (): MoodEntry | undefined => {
-        const today = new Date().toISOString().split('T')[0];
-        return entries.find(entry => entry.date === today);
+        return entries.filter(entry => entry.date === today);
     };
 
     const refreshEntries = async () => {
@@ -157,8 +151,7 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             value={{
                 entries,
                 addEntry,
-                hasCheckedInToday,
-                getTodayEntry,
+                getTodayEntries,
                 get30DayAverage,
                 get7DayTrend,
                 getEntriesByWeek,

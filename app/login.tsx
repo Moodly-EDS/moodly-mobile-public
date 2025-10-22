@@ -14,27 +14,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
 import { useToast } from '@context/toastcontext';
 
-type UserRole = 'employee' | 'manager';
-
 const LoginScreen: React.FC = () => {
   const router = useRouter();
   const { login } = useAuth();
   const { showError, showSuccess } = useToast();
-  const [role, setRole] = useState<UserRole>('employee');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setError('Please enter email and password');
       showError('Please enter email and password');
       return;
     }
 
     setIsLoading(true);
-    setError('');
 
     try {
       await login(email, password);
@@ -42,7 +36,6 @@ const LoginScreen: React.FC = () => {
       router.replace('/dashboard');
     } catch {
       const errorMessage = 'Invalid email or password';
-      setError(errorMessage);
       showError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -64,31 +57,8 @@ const LoginScreen: React.FC = () => {
               Sign in to Moodly
             </Text>
             <Text className="font-inter-regular text-base text-slate-600">
-              Select your role and enter credentials
+              Enter credentials
             </Text>
-          </View>
-          <View className="mb-8 w-full">
-            <Text className="mb-3 font-inter-semibold text-sm text-slate-700">Sign in as</Text>
-            <View className="flex-row">
-              <TouchableOpacity
-                onPress={() => setRole('employee')}
-                className={`mr-3 flex-1 items-center rounded-2xl border-2 p-4 ${role === 'employee' ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-white'
-                  }`}>
-                <Ionicons name="person-outline" size={32} color={role === 'employee' ? '#2563eb' : '#64748b'} />
-                <Text className={`mt-2 font-inter-semibold text-sm ${role === 'employee' ? 'text-blue-600' : 'text-slate-700'}`}>
-                  Employee
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setRole('manager')}
-                className={`ml-3 flex-1 items-center rounded-2xl border-2 p-4 ${role === 'manager' ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-white'
-                  }`}>
-                <Ionicons name="people-outline" size={32} color={role === 'manager' ? '#2563eb' : '#64748b'} />
-                <Text className={`mt-2 font-inter-semibold text-sm ${role === 'manager' ? 'text-blue-600' : 'text-slate-700'}`}>
-                  Manager
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
           <View className="mb-4 w-full">
             <Text className="mb-2 font-inter-medium text-sm text-slate-700">Email</Text>
@@ -119,12 +89,6 @@ const LoginScreen: React.FC = () => {
               Forgot password?
             </Text>
           </TouchableOpacity>
-
-          {error ? (
-            <View className="mb-4 w-full rounded-xl bg-red-50 p-3">
-              <Text className="text-center font-inter-medium text-sm text-red-600">{error}</Text>
-            </View>
-          ) : null}
 
           <TouchableOpacity
             onPress={handleLogin}

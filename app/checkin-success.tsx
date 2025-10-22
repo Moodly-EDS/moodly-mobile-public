@@ -31,7 +31,7 @@ const CheckInSuccessScreen: React.FC = () => {
 
             <TouchableOpacity
                 onPress={handleAnotherCheckIn}
-                className="w-full rounded-full border-2 border-slate-300 bg-white py-4 px-8">
+                className="w-full rounded-full border-2 border-slate-300 bg-white py-4 px-8 active:opacity-80">
                 <Text className="text-center font-inter-semibold text-base text-slate-900">
                     Submit another check-in
                 </Text>
@@ -39,7 +39,7 @@ const CheckInSuccessScreen: React.FC = () => {
 
             <TouchableOpacity
                 onPress={handleViewHistory}
-                className="mt-6">
+                className="mt-6 active:opacity-70">
                 <Text className="text-center font-inter-medium text-base text-blue-600">
                     View your history
                 </Text>

@@ -27,28 +27,23 @@ const RegisterScreen: React.FC = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
 
     const handleRegister = async () => {
-        setError('');
 
         if (!username || !email || !password || !confirmPassword) {
             const errorMsg = 'Please fill in all fields';
-            setError(errorMsg);
             showError(errorMsg);
             return;
         }
 
         if (password !== confirmPassword) {
             const errorMsg = 'Passwords do not match';
-            setError(errorMsg);
             showError(errorMsg);
             return;
         }
 
         if (password.length < 6) {
             const errorMsg = 'Password must be at least 6 characters';
-            setError(errorMsg);
             showError(errorMsg);
             return;
         }
@@ -61,7 +56,6 @@ const RegisterScreen: React.FC = () => {
             router.replace('/dashboard');
         } catch (err: any) {
             const errorMsg = err.message || 'Registration failed. Please try again.';
-            setError(errorMsg);
             showError(errorMsg);
         } finally {
             setIsLoading(false);
@@ -173,12 +167,6 @@ const RegisterScreen: React.FC = () => {
                             placeholderTextColor="#94a3b8"
                         />
                     </View>
-
-                    {error ? (
-                        <View className="mb-4 w-full rounded-xl bg-red-50 p-3">
-                            <Text className="text-center font-inter-medium text-sm text-red-600">{error}</Text>
-                        </View>
-                    ) : null}
 
                     <TouchableOpacity
                         onPress={handleRegister}

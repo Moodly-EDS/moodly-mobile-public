@@ -7,6 +7,7 @@ import {
     Dimensions,
     NativeSyntheticEvent,
     NativeScrollEvent,
+    Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,15 +78,13 @@ const OnboardingScreen: React.FC = () => {
 
     return (
         <View className="flex-1 bg-white">
-            {/* Header with Logo */}
-            <View className="mt-16 items-center">
+            <View className="mt-18 items-center">
                 <View className="flex-row items-center">
-                    <Ionicons name="people" size={32} color="#2563eb" />
+                    <Image source={require('../assets/images/logo.png')} className="w-8 h-6" />
                     <Text className="ml-2 font-inter-semibold text-2xl text-slate-900">Moodly</Text>
                 </View>
             </View>
 
-            {/* Slides */}
             <ScrollView
                 ref={scrollViewRef}
                 horizontal
@@ -111,7 +110,6 @@ const OnboardingScreen: React.FC = () => {
                 ))}
             </ScrollView>
 
-            {/* Pagination Dots */}
             <View className="mb-8 flex-row items-center justify-center">
                 {slides.map((_, index) => (
                     <View
@@ -122,7 +120,6 @@ const OnboardingScreen: React.FC = () => {
                 ))}
             </View>
 
-            {/* Navigation Buttons */}
             <View className="mb-12 flex-row items-center justify-between px-8">
                 <TouchableOpacity onPress={handleSkip} className="py-4 px-6">
                     <Text className="font-inter-medium text-base text-slate-600">Skip</Text>

@@ -6,27 +6,25 @@ import { useAuth } from '@context/authcontext';
 
 const IndexRedirect: React.FC = () => {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkInitialRoute();
+    if (!loading) {
+      checkInitialRoute();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, isAuthenticated]);
 
   const checkInitialRoute = async () => {
     try {
-      // Check if onboarding was completed
       const onboardingCompleted = await AsyncStorage.getItem('@moodly_onboarding_completed');
 
       if (!onboardingCompleted) {
-        // First time user - show onboarding
         router.replace('/onboarding');
       } else if (!isAuthenticated) {
-        // Onboarding done but not logged in - show login
         router.replace('/login');
       } else {
-        // Logged in - show dashboard
         router.replace('/dashboard');
       }
     } catch (error) {
@@ -37,7 +35,7 @@ const IndexRedirect: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (loading || isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#2563eb" />

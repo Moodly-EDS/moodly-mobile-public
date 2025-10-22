@@ -7,23 +7,46 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
+import { useToast } from '@context/toastcontext';
 
 type UserRole = 'employee' | 'manager';
 
 const LoginScreen: React.FC = () => {
   const router = useRouter();
   const { login } = useAuth();
+  const { showError, showSuccess } = useToast();
   const [role, setRole] = useState<UserRole>('employee');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    login();
-    router.replace('/dashboard');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter email and password');
+      showError('Please enter email and password');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await login(email, password);
+      showSuccess('Welcome back!');
+      router.replace('/dashboard');
+    } catch {
+      const errorMessage = 'Invalid email or password';
+      setError(errorMessage);
+      showError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,9 +55,9 @@ const LoginScreen: React.FC = () => {
       className="flex-1 bg-white">
       <ScrollView contentContainerClassName="flex-1">
         <View className="flex-1 items-center justify-center px-6">
-          <View className="mb-12 items-center">
+          <View className="mb-12 items-center mt-18">
             <View className="mb-6 flex-row items-center">
-              <Ionicons name="people" size={40} color="#2563eb" />
+              <Image source={require('../assets/images/logo.png')} className="w-8 h-6" />
               <Text className="ml-3 font-inter-bold text-3xl text-slate-900">Moodly</Text>
             </View>
             <Text className="mb-2 font-inter-bold text-2xl text-slate-900">
@@ -66,9 +89,6 @@ const LoginScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text className="mt-2 text-center font-inter-regular text-xs text-slate-500">
-              Share mood check-ins
-            </Text>
           </View>
           <View className="mb-4 w-full">
             <Text className="mb-2 font-inter-medium text-sm text-slate-700">Email</Text>
@@ -99,14 +119,29 @@ const LoginScreen: React.FC = () => {
               Forgot password?
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogin} className="mb-6 w-full rounded-full bg-blue-600 py-4">
-            <Text className="text-center font-inter-semibold text-base text-white">Sign in</Text>
-          </TouchableOpacity>
-          <View className="rounded-xl bg-slate-50 p-4">
-            <Text className="text-center font-inter-regular text-xs text-slate-600">
-              Demo mode: Use any email/password to continue
+
+          {error ? (
+            <View className="mb-4 w-full rounded-xl bg-red-50 p-3">
+              <Text className="text-center font-inter-medium text-sm text-red-600">{error}</Text>
+            </View>
+          ) : null}
+
+          <TouchableOpacity
+            onPress={handleLogin}
+            disabled={isLoading}
+            className={`mb-6 w-full rounded-full py-4 ${isLoading ? 'bg-blue-400' : 'bg-blue-600'}`}>
+            <Text className="text-center font-inter-semibold text-base text-white">
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Text>
-          </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/register')}
+            className="mb-4 w-full">
+            <Text className="text-center font-inter-medium text-sm text-slate-600">
+              Don&apos;t have an account? <Text className="text-blue-600">Sign up</Text>
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/onboarding')} className="mt-6 flex-row items-center">
             <Ionicons name="arrow-back" size={16} color="#64748b" />
             <Text className="ml-2 font-inter-medium text-sm text-slate-600">Back to home</Text>

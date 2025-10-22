@@ -1,12 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabaseService } from '../services/supabaseService';
+import { Report } from '../services/supabase';
+import { useAuth } from './authcontext';
+import {
+    MoodLevel,
+    MoodTag,
+    supabaseToMoodLevel,
+    supabaseToMoodTags,
+    moodLevelToSupabase,
+    moodTagsToSupabase,
+} from '../services/mappers';
 
-export type MoodLevel = 1 | 2 | 3 | 4 | 5;
-export type MoodTag = 'Workload' | 'Collaboration' | 'Recognition' | 'Autonomy' | 'Focus' | 'Personal' | 'Other';
+export { MoodLevel, MoodTag };
 
 export interface MoodEntry {
     id: string;
-    date: string; // ISO date string
+    date: string;
     mood: MoodLevel;
     tags: MoodTag[];
     timestamp: number;
@@ -15,70 +24,78 @@ export interface MoodEntry {
 interface MoodContextType {
     entries: MoodEntry[];
     addEntry: (mood: MoodLevel, tags: MoodTag[]) => Promise<void>;
-    hasCheckedInToday: () => boolean;
-    getTodayEntry: () => MoodEntry | undefined;
+    getTodayEntries: () => MoodEntry[];
     get30DayAverage: () => number;
     get7DayTrend: () => 'Rising' | 'Falling' | 'Stable';
     getEntriesByWeek: () => { thisWeek: MoodEntry[]; lastWeek: MoodEntry[] };
+    refreshEntries: () => Promise<void>;
     loading: boolean;
 }
 
 const MoodContext = createContext<MoodContextType | undefined>(undefined);
 
-const STORAGE_KEY = '@moodly_entries';
+const supabaseReportToMoodEntry = (report: Report): MoodEntry => {
+    return {
+        id: report.id,
+        date: report.date,
+        mood: supabaseToMoodLevel(report.mood),
+        tags: supabaseToMoodTags(report.reasons),
+        timestamp: new Date(report.created_at).getTime(),
+    };
+};
 
 export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [entries, setEntries] = useState<MoodEntry[]>([]);
     const [loading, setLoading] = useState(true);
+    const { isAuthenticated, user } = useAuth();
 
-    // Load entries from AsyncStorage on mount
     useEffect(() => {
-        loadEntries();
-    }, []);
+        if (isAuthenticated && user) {
+            loadEntries();
+        } else {
+            setEntries([]);
+            setLoading(false);
+        }
+    }, [isAuthenticated, user]);
 
     const loadEntries = async () => {
         try {
-            const storedEntries = await AsyncStorage.getItem(STORAGE_KEY);
-            if (storedEntries) {
-                setEntries(JSON.parse(storedEntries));
-            }
+            const reports = await supabaseService.getMyReports();
+            const moodEntries = reports.map(supabaseReportToMoodEntry);
+            setEntries(moodEntries);
         } catch (error) {
-            console.error('Failed to load mood entries:', error);
+            if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
+                setEntries([]);
+            } else {
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const saveEntries = async (newEntries: MoodEntry[]) => {
+    const addEntry = async (mood: MoodLevel, tags: MoodTag[]) => {
         try {
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-            setEntries(newEntries);
+            const supabaseMood = moodLevelToSupabase(mood);
+            const supabaseReasons = moodTagsToSupabase(tags);
+
+            const report = await supabaseService.createReport(supabaseMood, supabaseReasons);
+            const newEntry = supabaseReportToMoodEntry(report);
+
+            setEntries([newEntry, ...entries]);
         } catch (error) {
-            console.error('Failed to save mood entries:', error);
+            console.error('Failed to add mood entry:', error);
+            throw error;
         }
     };
 
-    const addEntry = async (mood: MoodLevel, tags: MoodTag[]) => {
-        const now = new Date();
-        const newEntry: MoodEntry = {
-            id: `${now.getTime()}`,
-            date: now.toISOString().split('T')[0],
-            mood,
-            tags,
-            timestamp: now.getTime(),
-        };
-        const updatedEntries = [newEntry, ...entries];
-        await saveEntries(updatedEntries);
+    const getTodayEntries = (): MoodEntry[] => {
+        const today = new Date().toISOString().split('T')[0];
+        return entries.filter(entry => entry.date === today);
     };
 
-    const hasCheckedInToday = (): boolean => {
-        const today = new Date().toISOString().split('T')[0];
-        return entries.some(entry => entry.date === today);
-    };
-
-    const getTodayEntry = (): MoodEntry | undefined => {
-        const today = new Date().toISOString().split('T')[0];
-        return entries.find(entry => entry.date === today);
+    const refreshEntries = async () => {
+        setLoading(true);
+        await loadEntries();
     };
 
     const get30DayAverage = (): number => {
@@ -134,11 +151,11 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             value={{
                 entries,
                 addEntry,
-                hasCheckedInToday,
-                getTodayEntry,
+                getTodayEntries,
                 get30DayAverage,
                 get7DayTrend,
                 getEntriesByWeek,
+                refreshEntries,
                 loading,
             }}>
             {children}

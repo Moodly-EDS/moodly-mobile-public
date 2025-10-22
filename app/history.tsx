@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMood } from '@context/moodcontext';
+import { BottomNavbar } from '../components/BottomNavbar';
 
 const moodEmojis: Record<number, string> = {
     1: '😞',
@@ -21,7 +21,6 @@ const moodLabels: Record<number, string> = {
 };
 
 const HistoryScreen: React.FC = () => {
-    const router = useRouter();
     const { entries, get30DayAverage, get7DayTrend, getEntriesByWeek } = useMood();
 
     const average = get30DayAverage();
@@ -43,14 +42,22 @@ const HistoryScreen: React.FC = () => {
         }
     };
 
+    const formatDateTime = (entry: typeof entries[0]) => {
+        // Si on a un created_at, l'utiliser pour afficher l'heure
+        const dateStr = formatDate(entry.date);
+        // On peut ajouter l'heure si disponible via timestamp
+        const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+        return { dateStr, time };
+    };
+
     return (
         <View className="flex-1 bg-white">
-            <ScrollView className="flex-1" contentContainerClassName="pb-8">
-                {/* Header */}
-                <View className="mt-6 flex-row items-center px-6">
-                    <TouchableOpacity onPress={() => router.back()} className="mr-4">
-                        <Ionicons name="arrow-back" size={24} color="#0f172a" />
-                    </TouchableOpacity>
+            <ScrollView className="flex-1" contentContainerClassName="pb-32">
+                <View className="mt-18 flex-row items-center px-6">
                     <View className="flex-1">
                         <Text className="font-inter-bold text-2xl text-slate-900">Your mood history</Text>
                         <Text className="font-inter-regular text-sm text-slate-500">
@@ -59,9 +66,7 @@ const HistoryScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* Statistics Cards */}
                 <View className="mt-6 flex-row px-6">
-                    {/* 30-day Average */}
                     <View className="mr-3 flex-1 rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
                         <View className="mb-2 flex-row items-center">
                             <Ionicons name="calendar-outline" size={16} color="#64748b" />
@@ -75,7 +80,6 @@ const HistoryScreen: React.FC = () => {
                         </Text>
                     </View>
 
-                    {/* 7-day Trend */}
                     <View className="ml-3 flex-1 rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
                         <View className="mb-2 flex-row items-center">
                             <Ionicons name="trending-up-outline" size={16} color="#64748b" />
@@ -87,73 +91,86 @@ const HistoryScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* This Week */}
                 {thisWeek.length > 0 && (
                     <View className="mt-8 px-6">
                         <Text className="mb-4 font-inter-semibold text-base text-slate-900">This week</Text>
-                        {thisWeek.map((entry) => (
-                            <View
-                                key={entry.id}
-                                className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
-                                <View className="flex-row items-center">
-                                    <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
-                                    <View>
-                                        <Text className="font-inter-medium text-base text-slate-900">
-                                            {moodLabels[entry.mood]}
-                                        </Text>
-                                        <Text className="font-inter-regular text-sm text-slate-500">
-                                            {formatDate(entry.date)}
-                                        </Text>
+                        {thisWeek.map((entry) => {
+                            const { dateStr, time } = formatDateTime(entry);
+                            return (
+                                <View
+                                    key={entry.id}
+                                    className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+                                    <View className="flex-row items-center flex-1">
+                                        <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
+                                        <View className="flex-1">
+                                            <Text className="font-inter-medium text-base text-slate-900">
+                                                {moodLabels[entry.mood]}
+                                            </Text>
+                                            <View className="flex-row items-center">
+                                                <Text className="font-inter-regular text-sm text-slate-500">
+                                                    {dateStr}
+                                                </Text>
+                                                <Text className="font-inter-regular text-xs text-slate-400 ml-2">
+                                                    • {time}
+                                                </Text>
+                                            </View>
+                                            <View className="mt-2 flex-row flex-wrap">
+                                                {entry.tags.map((tag, index) => (
+                                                    <View
+                                                        key={index}
+                                                        className="mr-2 mb-1 rounded-full bg-slate-100 px-3 py-1">
+                                                        <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </View>
                                     </View>
                                 </View>
-                                <View className="flex-row">
-                                    {entry.tags.map((tag, index) => (
-                                        <View
-                                            key={index}
-                                            className="ml-2 rounded-full bg-slate-100 px-3 py-1">
-                                            <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </View>
                 )}
 
-                {/* Last Week */}
                 {lastWeek.length > 0 && (
                     <View className="mt-6 px-6">
                         <Text className="mb-4 font-inter-semibold text-base text-slate-900">Last week</Text>
-                        {lastWeek.map((entry) => (
-                            <View
-                                key={entry.id}
-                                className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
-                                <View className="flex-row items-center">
-                                    <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
-                                    <View>
-                                        <Text className="font-inter-medium text-base text-slate-900">
-                                            {moodLabels[entry.mood]}
-                                        </Text>
-                                        <Text className="font-inter-regular text-sm text-slate-500">
-                                            {formatDate(entry.date)}
-                                        </Text>
+                        {lastWeek.map((entry) => {
+                            const { dateStr, time } = formatDateTime(entry);
+                            return (
+                                <View
+                                    key={entry.id}
+                                    className="mb-3 flex-row items-center justify-between rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+                                    <View className="flex-row items-center flex-1">
+                                        <Text className="mr-3 text-3xl">{moodEmojis[entry.mood]}</Text>
+                                        <View className="flex-1">
+                                            <Text className="font-inter-medium text-base text-slate-900">
+                                                {moodLabels[entry.mood]}
+                                            </Text>
+                                            <View className="flex-row items-center">
+                                                <Text className="font-inter-regular text-sm text-slate-500">
+                                                    {dateStr}
+                                                </Text>
+                                                <Text className="font-inter-regular text-xs text-slate-400 ml-2">
+                                                    • {time}
+                                                </Text>
+                                            </View>
+                                            <View className="mt-2 flex-row flex-wrap">
+                                                {entry.tags.map((tag, index) => (
+                                                    <View
+                                                        key={index}
+                                                        className="mr-2 mb-1 rounded-full bg-slate-100 px-3 py-1">
+                                                        <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </View>
                                     </View>
                                 </View>
-                                <View className="flex-row">
-                                    {entry.tags.map((tag, index) => (
-                                        <View
-                                            key={index}
-                                            className="ml-2 rounded-full bg-slate-100 px-3 py-1">
-                                            <Text className="font-inter-medium text-xs text-slate-700">{tag}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </View>
                 )}
 
-                {/* No Data */}
                 {entries.length === 0 && (
                     <View className="mt-20 items-center px-8">
                         <Ionicons name="time-outline" size={64} color="#cbd5e1" />
@@ -167,27 +184,7 @@ const HistoryScreen: React.FC = () => {
                 )}
             </ScrollView>
 
-            {/* Bottom Navigation */}
-            <View className="flex-row items-center justify-around border-t border-slate-200 py-4">
-                <TouchableOpacity
-                    onPress={() => router.push('/dashboard')}
-                    className="items-center py-2 px-4">
-                    <Ionicons name="home-outline" size={24} color="#94a3b8" />
-                    <Text className="mt-1 font-inter-regular text-xs text-slate-500">Check-in</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity className="items-center py-2 px-4">
-                    <Ionicons name="time" size={24} color="#2563eb" />
-                    <Text className="mt-1 font-inter-medium text-xs text-blue-600">History</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => router.push('/profile')}
-                    className="items-center py-2 px-4">
-                    <Ionicons name="log-out-outline" size={24} color="#94a3b8" />
-                    <Text className="mt-1 font-inter-regular text-xs text-slate-500">Sign out</Text>
-                </TouchableOpacity>
-            </View>
+            <BottomNavbar activeTab="history" />
         </View>
     );
 };

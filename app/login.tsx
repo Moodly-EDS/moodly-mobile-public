@@ -7,16 +7,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
+import { useToast } from '@context/toastcontext';
 
 type UserRole = 'employee' | 'manager';
 
 const LoginScreen: React.FC = () => {
   const router = useRouter();
   const { login } = useAuth();
+  const { showError, showSuccess } = useToast();
   const [role, setRole] = useState<UserRole>('employee');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,6 +29,7 @@ const LoginScreen: React.FC = () => {
   const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter email and password');
+      showError('Please enter email and password');
       return;
     }
 
@@ -34,10 +38,12 @@ const LoginScreen: React.FC = () => {
 
     try {
       await login(email, password);
+      showSuccess('Welcome back!');
       router.replace('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password');
-      console.error('Login error:', err);
+    } catch {
+      const errorMessage = 'Invalid email or password';
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +55,9 @@ const LoginScreen: React.FC = () => {
       className="flex-1 bg-white">
       <ScrollView contentContainerClassName="flex-1">
         <View className="flex-1 items-center justify-center px-6">
-          <View className="mb-12 items-center">
+          <View className="mb-12 items-center mt-18">
             <View className="mb-6 flex-row items-center">
-              <Ionicons name="people" size={40} color="#2563eb" />
+              <Image source={require('../assets/images/logo.png')} className="w-8 h-6" />
               <Text className="ml-3 font-inter-bold text-3xl text-slate-900">Moodly</Text>
             </View>
             <Text className="mb-2 font-inter-bold text-2xl text-slate-900">
@@ -83,9 +89,6 @@ const LoginScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text className="mt-2 text-center font-inter-regular text-xs text-slate-500">
-              Share mood check-ins
-            </Text>
           </View>
           <View className="mb-4 w-full">
             <Text className="mb-2 font-inter-medium text-sm text-slate-700">Email</Text>

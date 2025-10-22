@@ -11,7 +11,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Types
 export type AccountType = 'employee' | 'manager' | 'superadmin';
 export type MoodLevel = 'very_bad' | 'bad' | 'okay' | 'good' | 'very_good';
 

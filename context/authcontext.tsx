@@ -21,12 +21,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     checkAuth();
 
-    // Listen to auth changes
     const { data: subscription } = supabaseService.onAuthStateChange(async (authUser) => {
       if (authUser) {
-        const profile = await supabaseService.getProfile();
-        setUser(profile);
-        setIsAuthenticated(true);
+        try {
+          const profile = await supabaseService.getProfile();
+          setUser(profile);
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error('Failed to fetch profile on auth change:', error);
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       } else {
         setUser(null);
         setIsAuthenticated(false);
@@ -47,7 +52,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true);
       }
     } catch (error) {
-      console.error('Failed to check auth:', error);
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
+        setUser(null);
+        setIsAuthenticated(false);
+      } else {
+        console.error('Failed to check auth:', error);
+      }
     } finally {
       setLoading(false);
     }

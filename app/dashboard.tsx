@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useMood, MoodLevel, MoodTag } from '@context/moodcontext';
 import { useAuth } from '@context/authcontext';
+import { BottomNavbar } from '../components/BottomNavbar';
 
 const moodOptions: { level: MoodLevel; emoji: string; label: string }[] = [
   { level: 1, emoji: '😞', label: 'Very bad' },
@@ -25,7 +26,7 @@ const tagOptions: MoodTag[] = [
 
 const CheckInScreen: React.FC = () => {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { addEntry, hasCheckedInToday } = useMood();
   const [selectedMood, setSelectedMood] = useState<MoodLevel | null>(null);
   const [selectedTags, setSelectedTags] = useState<MoodTag[]>([]);
@@ -77,19 +78,19 @@ const CheckInScreen: React.FC = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-white">
-      <ScrollView className="flex-1" contentContainerClassName="pb-8">
-        <View className="mt-6 flex-row items-center justify-between px-6">
+      <ScrollView className="flex-1" contentContainerClassName="pb-32">
+        <View className="mt-16 flex-row items-center justify-between px-6">
           <View>
             <Text className="font-inter-regular text-sm text-slate-500">Today&apos;s check-in</Text>
             <Text className="font-inter-medium text-base text-slate-900">{today}</Text>
           </View>
           <View className="flex-row items-center">
-            <Ionicons name="people" size={24} color="#2563eb" />
+            <Image source={require('../assets/images/logo.png')} className="w-8 h-6" />
             <Text className="ml-2 font-inter-semibold text-xl text-slate-900">Moodly</Text>
           </View>
         </View>
 
-        <View className="mx-4 mt-8 rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+        <View className="mx-4 mt-8 rounded-3xl bg-white p-6 shadow-sm border border-slate-200 mb-38">
           {isManager ? (
             <View>
               <Text className="mb-4 font-inter-semibold text-xl text-slate-900">
@@ -111,26 +112,23 @@ const CheckInScreen: React.FC = () => {
                 How are you feeling today?
               </Text>
 
-              <View className="mb-6 flex-row justify-between">
+              <View className="mb-6 flex-row flex-wrap justify-center">
                 {moodOptions.map((option) => (
                   <TouchableOpacity
                     key={option.level}
                     onPress={() => setSelectedMood(option.level)}
-                    className={`items-center rounded-2xl p-4 ${selectedMood === option.level
+                    className={`items-center rounded-2xl p-4 m-2 ${selectedMood === option.level
                       ? 'bg-blue-50 border-2 border-blue-600'
                       : 'bg-white border-2 border-slate-200'
-                      }`}>
-                    <Text className="mb-2 text-4xl">{option.emoji}</Text>
-                    <Text className="font-inter-regular text-xs text-slate-600">
+                      }`}
+                    style={{ width: '28%' }}>
+                    <Text className="mb-2 text-3xl">{option.emoji}</Text>
+                    <Text className="font-inter-regular text-xs text-slate-600 text-center">
                       {option.label}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
-
-              <Text className="mb-2 text-center font-inter-regular text-xs text-slate-500">
-                Press 1-5 on your keyboard for quick selection
-              </Text>
             </View>
           )}
 
@@ -159,7 +157,7 @@ const CheckInScreen: React.FC = () => {
               </View>
 
               <Text className="font-inter-regular text-xs text-slate-500">
-                {selectedTags.length}/2 selected • Optional—helps understand patterns
+                {selectedTags.length}/2 selected
               </Text>
             </View>
           )}
@@ -175,12 +173,6 @@ const CheckInScreen: React.FC = () => {
                   {isSubmitting ? 'Submitting...' : 'Submit check-in'}
                 </Text>
               </TouchableOpacity>
-
-              {canSubmit && (
-                <Text className="mt-2 text-center font-inter-regular text-xs text-slate-500">
-                  Press Enter to submit
-                </Text>
-              )}
             </>
           )}
 
@@ -198,31 +190,8 @@ const CheckInScreen: React.FC = () => {
             </View>
           </View>
         </View>
-
-        <View className="mt-8 flex-row items-center justify-around border-t border-slate-200 pt-4">
-          <TouchableOpacity className="items-center py-2 px-4">
-            <Ionicons name="home" size={24} color="#2563eb" />
-            <Text className="mt-1 font-inter-medium text-xs text-blue-600">Check-in</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => router.push('/history')}
-            className="items-center py-2 px-4">
-            <Ionicons name="time-outline" size={24} color="#94a3b8" />
-            <Text className="mt-1 font-inter-regular text-xs text-slate-500">History</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={async () => {
-              await logout();
-              router.replace('/login');
-            }}
-            className="items-center py-2 px-4">
-            <Ionicons name="log-out-outline" size={24} color="#94a3b8" />
-            <Text className="mt-1 font-inter-regular text-xs text-slate-500">Sign out</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+      <BottomNavbar activeTab="dashboard" />
     </KeyboardAvoidingView>
   );
 };

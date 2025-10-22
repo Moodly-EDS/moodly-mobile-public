@@ -46,9 +46,23 @@ class SupabaseService {
     }
 
     async getCurrentUser() {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
-        return user;
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error) {
+                // If it's just a missing session, return null instead of throwing
+                if (error.message?.includes('session') || error.name === 'AuthSessionMissingError') {
+                    return null;
+                }
+                throw error;
+            }
+            return user;
+        } catch (error) {
+            // Catch AuthSessionMissingError and return null gracefully
+            if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
+                return null;
+            }
+            throw error;
+        }
     }
 
     async getProfile(): Promise<Profile | null> {

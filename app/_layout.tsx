@@ -5,6 +5,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { ThemeProvider } from '@context/themecontext';
 import { AuthProvider } from '@context/authcontext';
 import { MoodProvider } from '@context/moodcontext';
+import { ToastProvider } from '@context/toastcontext';
 
 import '../global.css';
 
@@ -46,13 +47,15 @@ export default function RootLayout() {
     <ThemeProvider>
       <AuthProvider>
         <MoodProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              gestureEnabled: true,
-              animation: 'slide_from_right',
-            }}
-          />
+          <ToastProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: true,
+                animation: 'slide_from_right',
+              }}
+            />
+          </ToastProvider>
         </MoodProvider>
       </AuthProvider>
     </ThemeProvider>

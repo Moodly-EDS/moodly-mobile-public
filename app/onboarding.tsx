@@ -7,6 +7,7 @@ import {
     Dimensions,
     NativeSyntheticEvent,
     NativeScrollEvent,
+    Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,9 +78,9 @@ const OnboardingScreen: React.FC = () => {
 
     return (
         <View className="flex-1 bg-white">
-            <View className="mt-16 items-center">
+            <View className="mt-18 items-center">
                 <View className="flex-row items-center">
-                    <Ionicons name="people" size={32} color="#2563eb" />
+                    <Image source={require('../assets/images/logo.png')} className="w-8 h-6" />
                     <Text className="ml-2 font-inter-semibold text-2xl text-slate-900">Moodly</Text>
                 </View>
             </View>

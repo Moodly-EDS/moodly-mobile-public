@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = 'https://unwavering-nurture-b5b95b1a3b.strapiapp.com/api';
 
-// Types matching Strapi enums
 export type StrapiMood = 'very_bad' | 'bad' | 'okay' | 'good' | 'very_good';
 export type StrapiReason = 'Workload' | 'Collaboration' | 'Recognition' | 'Autonomy' | 'Focus' | 'Personal' | 'Other';
 export type AccountType = 'employee' | 'manager' | 'superadmin';
@@ -51,7 +50,6 @@ class ApiService {
         return headers;
     }
 
-    // Auth
     async login(email: string, password: string): Promise<LoginResponse> {
         const response = await fetch(`${API_URL}/auth/local`, {
             method: 'POST',
@@ -77,7 +75,6 @@ class ApiService {
     }
 
     async register(username: string, email: string, password: string, accountType: 'employee' | 'manager'): Promise<LoginResponse> {
-        // Step 1: Register the user (without account_type)
         const registerResponse = await fetch(`${API_URL}/auth/local/register`, {
             method: 'POST',
             headers: {
@@ -98,7 +95,6 @@ class ApiService {
         const registerData: LoginResponse = await registerResponse.json();
         this.token = registerData.jwt;
 
-        // Step 2: Update the user with account_type
         const updateResponse = await fetch(`${API_URL}/users/${registerData.user.id}`, {
             method: 'PUT',
             headers: {
@@ -140,7 +136,6 @@ class ApiService {
         return userStr ? JSON.parse(userStr) : null;
     }
 
-    // Reports
     async createReport(mood: StrapiMood, reasons: StrapiReason[]): Promise<StrapiReport> {
         const headers = await this.getHeaders();
         const user = await this.getCurrentUser();
@@ -255,7 +250,6 @@ class ApiService {
         return data.data.length > 0 ? data.data[0] : null;
     }
 
-    // Manager: Get all reports (aggregated)
     async getAllReports(startDate?: string, endDate?: string): Promise<StrapiReport[]> {
         const headers = await this.getHeaders();
         const user = await this.getCurrentUser();

@@ -34,7 +34,6 @@ interface MoodContextType {
 
 const MoodContext = createContext<MoodContextType | undefined>(undefined);
 
-// Helper to convert Supabase report to MoodEntry
 const supabaseReportToMoodEntry = (report: Report): MoodEntry => {
     return {
         id: report.id,
@@ -59,7 +58,11 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const moodEntries = reports.map(supabaseReportToMoodEntry);
             setEntries(moodEntries);
         } catch (error) {
-            console.error('Failed to load mood entries:', error);
+            if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
+                setEntries([]);
+            } else {
+                console.error('Failed to load mood entries:', error);
+            }
         } finally {
             setLoading(false);
         }

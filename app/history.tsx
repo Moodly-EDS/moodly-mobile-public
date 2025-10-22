@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMood } from '@context/moodcontext';
-import { useAuth } from '@context/authcontext';
+import { BottomNavbar } from '../components/BottomNavbar';
 
 const moodEmojis: Record<number, string> = {
     1: '😞',
@@ -22,8 +21,6 @@ const moodLabels: Record<number, string> = {
 };
 
 const HistoryScreen: React.FC = () => {
-    const router = useRouter();
-    const { logout } = useAuth();
     const { entries, get30DayAverage, get7DayTrend, getEntriesByWeek } = useMood();
 
     const average = get30DayAverage();
@@ -47,11 +44,8 @@ const HistoryScreen: React.FC = () => {
 
     return (
         <View className="flex-1 bg-white">
-            <ScrollView className="flex-1" contentContainerClassName="pb-8">
-                <View className="mt-6 flex-row items-center px-6">
-                    <TouchableOpacity onPress={() => router.back()} className="mr-4">
-                        <Ionicons name="arrow-back" size={24} color="#0f172a" />
-                    </TouchableOpacity>
+            <ScrollView className="flex-1" contentContainerClassName="pb-32">
+                <View className="mt-18 flex-row items-center px-6">
                     <View className="flex-1">
                         <Text className="font-inter-bold text-2xl text-slate-900">Your mood history</Text>
                         <Text className="font-inter-regular text-sm text-slate-500">
@@ -162,29 +156,7 @@ const HistoryScreen: React.FC = () => {
                 )}
             </ScrollView>
 
-            <View className="flex-row items-center justify-around border-t border-slate-200 py-4">
-                <TouchableOpacity
-                    onPress={() => router.push('/dashboard')}
-                    className="items-center py-2 px-4">
-                    <Ionicons name="home-outline" size={24} color="#94a3b8" />
-                    <Text className="mt-1 font-inter-regular text-xs text-slate-500">Check-in</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity className="items-center py-2 px-4">
-                    <Ionicons name="time" size={24} color="#2563eb" />
-                    <Text className="mt-1 font-inter-medium text-xs text-blue-600">History</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={async () => {
-                        await logout();
-                        router.replace('/login');
-                    }}
-                    className="items-center py-2 px-4">
-                    <Ionicons name="log-out-outline" size={24} color="#94a3b8" />
-                    <Text className="mt-1 font-inter-regular text-xs text-slate-500">Sign out</Text>
-                </TouchableOpacity>
-            </View>
+            <BottomNavbar activeTab="history" />
         </View>
     );
 };

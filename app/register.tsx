@@ -8,16 +8,19 @@ import {
     Platform,
     ScrollView,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@context/authcontext';
+import { useToast } from '@context/toastcontext';
 
 type UserRole = 'employee' | 'manager';
 
 const RegisterScreen: React.FC = () => {
     const router = useRouter();
     const { register } = useAuth();
+    const { showError, showSuccess } = useToast();
     const [role, setRole] = useState<UserRole>('employee');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -29,19 +32,24 @@ const RegisterScreen: React.FC = () => {
     const handleRegister = async () => {
         setError('');
 
-        // Validation
         if (!username || !email || !password || !confirmPassword) {
-            setError('Please fill in all fields');
+            const errorMsg = 'Please fill in all fields';
+            setError(errorMsg);
+            showError(errorMsg);
             return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            const errorMsg = 'Passwords do not match';
+            setError(errorMsg);
+            showError(errorMsg);
             return;
         }
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters');
+            const errorMsg = 'Password must be at least 6 characters';
+            setError(errorMsg);
+            showError(errorMsg);
             return;
         }
 
@@ -49,10 +57,12 @@ const RegisterScreen: React.FC = () => {
 
         try {
             await register(username, email, password, role);
+            showSuccess('Account created successfully! Welcome to Moodly!');
             router.replace('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Registration failed. Please try again.');
-            console.error('Registration error:', err);
+            const errorMsg = err.message || 'Registration failed. Please try again.';
+            setError(errorMsg);
+            showError(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -64,10 +74,9 @@ const RegisterScreen: React.FC = () => {
             className="flex-1 bg-white">
             <ScrollView contentContainerClassName="flex-1">
                 <View className="flex-1 items-center justify-center px-6 py-12">
-                    {/* Header */}
-                    <View className="mb-8 items-center">
+                    <View className="mb-8 items-center mt-4">
                         <View className="mb-4 flex-row items-center">
-                            <Ionicons name="people" size={40} color="#2563eb" />
+                            <Image source={require('../assets/images/logo.png')} className="w-8 h-6" />
                             <Text className="ml-3 font-inter-bold text-3xl text-slate-900">Moodly</Text>
                         </View>
                         <Text className="mb-2 font-inter-bold text-2xl text-slate-900">
@@ -78,7 +87,6 @@ const RegisterScreen: React.FC = () => {
                         </Text>
                     </View>
 
-                    {/* Role Selection */}
                     <View className="mb-6 w-full">
                         <Text className="mb-3 font-inter-semibold text-sm text-slate-700">I am a</Text>
                         <View className="flex-row">
@@ -115,7 +123,6 @@ const RegisterScreen: React.FC = () => {
                         </View>
                     </View>
 
-                    {/* Form Fields */}
                     <View className="mb-4 w-full">
                         <Text className="mb-2 font-inter-medium text-sm text-slate-700">Username</Text>
                         <TextInput
@@ -167,14 +174,12 @@ const RegisterScreen: React.FC = () => {
                         />
                     </View>
 
-                    {/* Error Message */}
                     {error ? (
                         <View className="mb-4 w-full rounded-xl bg-red-50 p-3">
                             <Text className="text-center font-inter-medium text-sm text-red-600">{error}</Text>
                         </View>
                     ) : null}
 
-                    {/* Sign Up Button */}
                     <TouchableOpacity
                         onPress={handleRegister}
                         disabled={isLoading}
@@ -189,14 +194,12 @@ const RegisterScreen: React.FC = () => {
                         )}
                     </TouchableOpacity>
 
-                    {/* Back to Login */}
                     <TouchableOpacity onPress={() => router.back()} className="mb-4 w-full">
                         <Text className="text-center font-inter-medium text-sm text-slate-600">
                             Already have an account? <Text className="text-blue-600">Sign in</Text>
                         </Text>
                     </TouchableOpacity>
 
-                    {/* Back to Home */}
                     <TouchableOpacity
                         onPress={() => router.push('/onboarding')}
                         className="mt-2 flex-row items-center">

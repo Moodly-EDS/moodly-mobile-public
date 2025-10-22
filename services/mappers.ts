@@ -1,10 +1,8 @@
 import { MoodLevel as SupabaseMood } from './supabase';
 
-// App types
 export type MoodLevel = 1 | 2 | 3 | 4 | 5;
 export type MoodTag = 'Workload' | 'Collaboration' | 'Recognition' | 'Autonomy' | 'Focus' | 'Personal' | 'Other';
 
-// Convert app mood level to Supabase mood
 export const moodLevelToSupabase = (level: MoodLevel): SupabaseMood => {
     const mapping: Record<MoodLevel, SupabaseMood> = {
         1: 'very_bad',
@@ -16,7 +14,6 @@ export const moodLevelToSupabase = (level: MoodLevel): SupabaseMood => {
     return mapping[level];
 };
 
-// Convert Supabase mood to app mood level
 export const supabaseToMoodLevel = (mood: SupabaseMood): MoodLevel => {
     const mapping: Record<SupabaseMood, MoodLevel> = {
         'very_bad': 1,
@@ -28,7 +25,6 @@ export const supabaseToMoodLevel = (mood: SupabaseMood): MoodLevel => {
     return mapping[mood];
 };
 
-// Tags are stored as-is in Supabase (strings in JSON array)
 export const moodTagsToSupabase = (tags: MoodTag[]): string[] => {
     return tags;
 };
@@ -37,7 +33,6 @@ export const supabaseToMoodTags = (tags: string[]): MoodTag[] => {
     return tags as MoodTag[];
 };
 
-// Mood emojis
 export const getMoodEmoji = (level: MoodLevel): string => {
     const emojis: Record<MoodLevel, string> = {
         1: '😞',
@@ -49,7 +44,6 @@ export const getMoodEmoji = (level: MoodLevel): string => {
     return emojis[level];
 };
 
-// Mood labels
 export const getMoodLabel = (level: MoodLevel): string => {
     const labels: Record<MoodLevel, string> = {
         1: 'Very bad',

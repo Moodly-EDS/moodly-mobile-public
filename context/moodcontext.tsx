@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabaseService } from '../services/supabaseService';
 import { Report } from '../services/supabase';
+import { useAuth } from './authcontext';
 import {
     MoodLevel,
     MoodTag,
@@ -47,10 +48,16 @@ const supabaseReportToMoodEntry = (report: Report): MoodEntry => {
 export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [entries, setEntries] = useState<MoodEntry[]>([]);
     const [loading, setLoading] = useState(true);
+    const { isAuthenticated, user } = useAuth();
 
     useEffect(() => {
-        loadEntries();
-    }, []);
+        if (isAuthenticated && user) {
+            loadEntries();
+        } else {
+            setEntries([]);
+            setLoading(false);
+        }
+    }, [isAuthenticated, user]);
 
     const loadEntries = async () => {
         try {
@@ -61,7 +68,6 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
                 setEntries([]);
             } else {
-                console.error('Failed to load mood entries:', error);
             }
         } finally {
             setLoading(false);

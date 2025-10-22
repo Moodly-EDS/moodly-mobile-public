@@ -49,7 +49,6 @@ class SupabaseService {
         try {
             const { data: { user }, error } = await supabase.auth.getUser();
             if (error) {
-                // If it's just a missing session, return null instead of throwing
                 if (error.message?.includes('session') || error.name === 'AuthSessionMissingError') {
                     return null;
                 }
@@ -57,7 +56,6 @@ class SupabaseService {
             }
             return user;
         } catch (error) {
-            // Catch AuthSessionMissingError and return null gracefully
             if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
                 return null;
             }
@@ -77,7 +75,6 @@ class SupabaseService {
 
         if (error) throw error;
 
-        // Si le profil n'existe pas, le créer (pour les utilisateurs existants)
         if (!data) {
             const username = user.email?.split('@')[0] || 'user';
             const { data: newProfile, error: insertError } = await supabase
@@ -98,9 +95,6 @@ class SupabaseService {
         return data;
     }
 
-    // ============================================
-    // AUTH LISTENER
-    // ============================================
 
     onAuthStateChange(callback: (user: any) => void) {
         return supabase.auth.onAuthStateChange((event, session) => {
@@ -108,9 +102,6 @@ class SupabaseService {
         });
     }
 
-    // ============================================
-    // REPORTS
-    // ============================================
 
     async createReport(mood: MoodLevel, reasons: string[]): Promise<Report> {
         const user = await this.getCurrentUser();
@@ -135,7 +126,9 @@ class SupabaseService {
 
     async getMyReports(): Promise<Report[]> {
         const user = await this.getCurrentUser();
-        if (!user) throw new Error('User not authenticated');
+        if (!user) {
+            throw new Error('User not authenticated');
+        }
 
         const { data, error } = await supabase
             .from('reports')
@@ -143,7 +136,11 @@ class SupabaseService {
             .eq('user_id', user.id)
             .order('date', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ getMyReports error:', error);
+            throw error;
+        }
+
         return data || [];
     }
 
@@ -225,6 +222,123 @@ class SupabaseService {
 
         if (error) throw error;
         return data || [];
+    }
+
+    // ============================================
+    // MANAGER STATISTICS (ANONYMOUS)
+    // ============================================
+
+    async getTeamStats(days: number = 30) {
+        const profile = await this.getProfile();
+
+        if (!profile || !['manager', 'superadmin'].includes(profile.account_type)) {
+            throw new Error('Unauthorized: Only managers can view team statistics');
+        }
+
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        const startDateStr = startDate.toISOString().split('T')[0];
+
+        // Récupérer tous les reports anonymes (sans user_id)
+        const { data: reports, error } = await supabase
+            .from('reports')
+            .select('mood, reasons, date')
+            .gte('date', startDateStr)
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        const allReports = reports || [];
+
+        // Calculer la moyenne
+        const average = allReports.length > 0
+            ? allReports.reduce((sum, r) => sum + r.mood, 0) / allReports.length
+            : 0;
+
+        // Calculer le trend 7 jours
+        const last7Days = allReports.filter(r => {
+            const reportDate = new Date(r.date);
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            return reportDate >= sevenDaysAgo;
+        });
+
+        const prev7Days = allReports.filter(r => {
+            const reportDate = new Date(r.date);
+            const fourteenDaysAgo = new Date();
+            fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            return reportDate >= fourteenDaysAgo && reportDate < sevenDaysAgo;
+        });
+
+        const last7DaysAvg = last7Days.length > 0
+            ? last7Days.reduce((sum, r) => sum + r.mood, 0) / last7Days.length
+            : 0;
+
+        const prev7DaysAvg = prev7Days.length > 0
+            ? prev7Days.reduce((sum, r) => sum + r.mood, 0) / prev7Days.length
+            : 0;
+
+        const trendDiff = last7DaysAvg - prev7DaysAvg;
+        const trendLabel = trendDiff > 0.1 ? 'Rising' : trendDiff < -0.1 ? 'Falling' : 'Stable';
+
+        // Distribution des moods (breakdown)
+        const moodDistribution = {
+            very_bad: 0,
+            bad: 0,
+            okay: 0,
+            good: 0,
+            very_good: 0,
+        };
+
+        last7Days.forEach(r => {
+            if (r.mood && moodDistribution.hasOwnProperty(r.mood)) {
+                moodDistribution[r.mood as MoodLevel]++;
+            }
+        });
+
+        // Top influences (compter les raisons)
+        const reasonsCount: Record<string, number> = {};
+        last7Days.forEach(r => {
+            r.reasons?.forEach((reason: string) => {
+                reasonsCount[reason] = (reasonsCount[reason] || 0) + 1;
+            });
+        });
+
+        const topInfluences = Object.entries(reasonsCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([reason, count]) => ({ reason, count }));
+
+        // Données pour le graphique 7 jours
+        const last7DaysData: { date: string; average: number }[] = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+
+            const dayReports = allReports.filter(r => r.date === dateStr);
+            const dayAvg = dayReports.length > 0
+                ? dayReports.reduce((sum, r) => sum + r.mood, 0) / dayReports.length
+                : 0;
+
+            last7DaysData.push({ date: dateStr, average: dayAvg });
+        }
+
+        return {
+            average: Math.round(average * 10) / 10,
+            totalReports: allReports.length,
+            last7Days: {
+                average: Math.round(last7DaysAvg * 10) / 10,
+                trend: trendLabel,
+                trendDiff: Math.round(trendDiff * 100) / 100,
+                totalCheckins: last7Days.length,
+                moodDistribution,
+                chartData: last7DaysData,
+            },
+            topInfluences,
+        };
     }
 }
 

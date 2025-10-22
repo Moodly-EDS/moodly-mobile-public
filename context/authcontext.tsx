@@ -6,7 +6,12 @@ type AuthContextType = {
   isAuthenticated: boolean;
   user: Profile | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, accountType: AccountType) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+    accountType: AccountType
+  ) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 };
@@ -52,7 +57,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true);
       }
     } catch (error) {
-      if (error && typeof error === 'object' && 'name' in error && error.name === 'AuthSessionMissingError') {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'AuthSessionMissingError'
+      ) {
         setUser(null);
         setIsAuthenticated(false);
       } else {
@@ -75,7 +85,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const register = async (username: string, email: string, password: string, accountType: AccountType) => {
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+    accountType: AccountType
+  ) => {
     try {
       await supabaseService.signUp(email, password, username, accountType);
       const profile = await supabaseService.getProfile();

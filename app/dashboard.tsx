@@ -18,8 +18,8 @@ const DashboardRouter: React.FC = () => {
   }, [user, loading, router]);
 
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <ActivityIndicator size="large" color="#2563eb" />
+    <View className='flex-1 items-center justify-center bg-white'>
+      <ActivityIndicator size='large' color='#2563eb' />
     </View>
   );
 };

@@ -8,145 +8,143 @@ import { BlurView } from 'expo-blur';
 type NavItem = 'dashboard' | 'history' | 'logout';
 
 interface BottomNavbarProps {
-    activeTab?: NavItem;
+  activeTab?: NavItem;
 }
 
 export const BottomNavbar: React.FC<BottomNavbarProps> = ({ activeTab = 'dashboard' }) => {
-    const router = useRouter();
-    const { logout } = useAuth();
-    const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
+  const pathname = usePathname();
 
-    const currentTab = activeTab || (pathname.includes('/history') ? 'history' : 'dashboard');
+  const currentTab = activeTab || (pathname.includes('/history') ? 'history' : 'dashboard');
 
-    const handleLogout = async () => {
-        await logout();
-        router.replace('/login');
-    };
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
+  };
 
-    return (
-        <View style={styles.container}>
-            <BlurView intensity={15} tint="light" style={styles.blurContainer}>
-                <View className="flex-row items-center justify-around py-1 px-2">
-                    <TouchableOpacity
-                        onPress={() => router.push('/dashboard')}
-                        className="items-center py-2 px-3"
-                        style={[
-                            styles.tabButton,
-                            currentTab === 'dashboard' && styles.activeTabButton
-                        ]}>
-                        <View style={[
-                            styles.iconContainer,
-                            currentTab === 'dashboard' && styles.activeIconContainer
-                        ]}>
-                            <Ionicons
-                                name={currentTab === 'dashboard' ? 'home' : 'home-outline'}
-                                size={15}
-                                color={currentTab === 'dashboard' ? '#ffffff' : '#64748b'}
-                            />
-                        </View>
-                        <Text
-                            className={`mt-1.5 text-xs ${currentTab === 'dashboard'
-                                ? 'font-inter-semibold text-blue-600'
-                                : 'font-inter-medium text-slate-500'
-                                }`}>
-                            Check-in
-                        </Text>
-                    </TouchableOpacity>
+  return (
+    <View style={styles.container}>
+      <BlurView intensity={15} tint='light' style={styles.blurContainer}>
+        <View className='flex-row items-center justify-around px-2 py-1'>
+          <TouchableOpacity
+            onPress={() => router.push('/dashboard')}
+            className='items-center px-3 py-2'
+            style={[styles.tabButton, currentTab === 'dashboard' && styles.activeTabButton]}>
+            <View
+              style={[
+                styles.iconContainer,
+                currentTab === 'dashboard' && styles.activeIconContainer,
+              ]}>
+              <Ionicons
+                name={currentTab === 'dashboard' ? 'home' : 'home-outline'}
+                size={15}
+                color={currentTab === 'dashboard' ? '#ffffff' : '#64748b'}
+              />
+            </View>
+            <Text
+              className={`mt-1.5 text-xs ${
+                currentTab === 'dashboard'
+                  ? 'font-inter-semibold text-blue-600'
+                  : 'font-inter-medium text-slate-500'
+              }`}>
+              Check-in
+            </Text>
+          </TouchableOpacity>
 
-                    <TouchableOpacity
-                        onPress={() => router.push('/history')}
-                        className="items-center py-2 px-3"
-                        style={[
-                            styles.tabButton,
-                            currentTab === 'history' && styles.activeTabButton
-                        ]}>
-                        <View style={[
-                            styles.iconContainer,
-                            currentTab === 'history' && styles.activeIconContainer
-                        ]}>
-                            <Ionicons
-                                name={currentTab === 'history' ? 'time' : 'time-outline'}
-                                size={15}
-                                color={currentTab === 'history' ? '#ffffff' : '#64748b'}
-                            />
-                        </View>
-                        <Text
-                            className={`mt-1.5 text-xs ${currentTab === 'history'
-                                ? 'font-inter-semibold text-blue-600'
-                                : 'font-inter-medium text-slate-500'
-                                }`}>
-                            History
-                        </Text>
-                    </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/history')}
+            className='items-center px-3 py-2'
+            style={[styles.tabButton, currentTab === 'history' && styles.activeTabButton]}>
+            <View
+              style={[
+                styles.iconContainer,
+                currentTab === 'history' && styles.activeIconContainer,
+              ]}>
+              <Ionicons
+                name={currentTab === 'history' ? 'time' : 'time-outline'}
+                size={15}
+                color={currentTab === 'history' ? '#ffffff' : '#64748b'}
+              />
+            </View>
+            <Text
+              className={`mt-1.5 text-xs ${
+                currentTab === 'history'
+                  ? 'font-inter-semibold text-blue-600'
+                  : 'font-inter-medium text-slate-500'
+              }`}>
+              History
+            </Text>
+          </TouchableOpacity>
 
-                    <TouchableOpacity
-                        onPress={handleLogout}
-                        className="items-center py-2 px-3"
-                        style={styles.tabButton}>
-                        <View style={styles.iconContainer}>
-                            <Ionicons name="log-out-outline" size={15} color="#64748b" />
-                        </View>
-                        <Text className="mt-1.5 font-inter-medium text-xs text-slate-500">Sign out</Text>
-                    </TouchableOpacity>
-                </View>
-            </BlurView>
+          <TouchableOpacity
+            onPress={handleLogout}
+            className='items-center px-3 py-2'
+            style={styles.tabButton}>
+            <View style={styles.iconContainer}>
+              <Ionicons name='log-out-outline' size={15} color='#64748b' />
+            </View>
+            <Text className='font-inter-medium mt-1.5 text-xs text-slate-500'>Sign out</Text>
+          </TouchableOpacity>
         </View>
-    );
+      </BlurView>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        position: 'absolute',
-        bottom: 15,
-        left: 20,
-        right: 20,
-        borderRadius: 32,
-        overflow: 'hidden',
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 12 },
-                shadowOpacity: 0.2,
-                shadowRadius: 20,
-            },
-            android: {
-                elevation: 12,
-            },
-        }),
-    },
-    blurContainer: {
-        borderRadius: 32,
-        borderWidth: 1.5,
-        borderColor: 'rgba(255, 255, 255, 0.4)',
-        backgroundColor: Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
-    },
-    tabButton: {
-        borderRadius: 20,
-        minWidth: 30,
-    },
-    activeTabButton: {
-        transform: [{ scale: 1.08 }],
-    },
-    iconContainer: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(100, 116, 139, 0.06)',
-    },
-    activeIconContainer: {
-        backgroundColor: '#2563eb',
-        ...Platform.select({
-            ios: {
-                shadowColor: '#2563eb',
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.4,
-                shadowRadius: 12,
-            },
-            android: {
-                elevation: 6,
-            },
-        }),
-    },
+  container: {
+    position: 'absolute',
+    bottom: 15,
+    left: 20,
+    right: 20,
+    borderRadius: 32,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 12,
+      },
+    }),
+  },
+  blurContainer: {
+    borderRadius: 32,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+  },
+  tabButton: {
+    borderRadius: 20,
+    minWidth: 30,
+  },
+  activeTabButton: {
+    transform: [{ scale: 1.08 }],
+  },
+  iconContainer: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(100, 116, 139, 0.06)',
+  },
+  activeIconContainer: {
+    backgroundColor: '#2563eb',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#2563eb',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
 });

@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setPref(saved);
           nativewind.setColorScheme(saved);
         }
-      } catch { }
+      } catch {}
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     async (t: ThemePreference) => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, t);
-      } catch { }
+      } catch {}
       setPref(t);
       nativewind.setColorScheme(t);
     },

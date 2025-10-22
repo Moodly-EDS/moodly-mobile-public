@@ -5,12 +5,14 @@ Une application mobile de suivi d'humeur (mood tracking) développée avec React
 ## 🎯 Fonctionnalités
 
 ### ✅ Onboarding
+
 - Carrousel de 3 slides expliquant l'application
 - Quick check-ins (< 30 secondes)
 - Anonymat garanti
 - Insights pour les managers
 
 ### 📝 Check-in Quotidien
+
 - Sélection d'humeur via 5 emojis (😞 à 😄)
 - Tags optionnels pour identifier les influences :
   - Workload
@@ -24,12 +26,14 @@ Une application mobile de suivi d'humeur (mood tracking) développée avec React
 - Raccourcis clavier (1-5, Enter)
 
 ### 📊 Historique et Statistiques
+
 - Moyenne sur 30 jours
 - Tendance sur 7 jours (Rising/Falling/Stable)
 - Liste des check-ins par semaine (Cette semaine / Semaine dernière)
 - Visualisation des tags associés
 
 ### 🔐 Authentification
+
 - Connexion simple (mode démo)
 - Sélection du rôle (Employee/Manager)
 - Gestion de session avec AuthContext
@@ -57,7 +61,9 @@ context/
 ### Contexts
 
 #### MoodContext
+
 Gère toutes les données de mood tracking :
+
 - `entries[]` : Liste des check-ins
 - `addEntry()` : Ajouter un check-in
 - `hasCheckedInToday()` : Vérifier si déjà checké aujourd'hui
@@ -66,9 +72,11 @@ Gère toutes les données de mood tracking :
 - `getEntriesByWeek()` : Entrées par semaine
 
 #### AuthContext
+
 Gère l'authentification utilisateur
 
 #### ThemeContext
+
 Gère le thème de l'application
 
 ### Flux de Navigation
@@ -88,6 +96,7 @@ index.tsx
 ## 💾 Stockage des Données
 
 Les données sont stockées localement avec AsyncStorage :
+
 - `@moodly_onboarding_completed` : État de l'onboarding
 - `@moodly_entries` : Liste des check-ins
 
@@ -96,7 +105,7 @@ Les données sont stockées localement avec AsyncStorage :
 ```typescript
 interface MoodEntry {
   id: string;
-  date: string;        // ISO date (YYYY-MM-DD)
+  date: string; // ISO date (YYYY-MM-DD)
   mood: 1 | 2 | 3 | 4 | 5;
   tags: MoodTag[];
   timestamp: number;
@@ -106,16 +115,19 @@ interface MoodEntry {
 ## 🎨 Design System
 
 ### Couleurs
+
 - Primary: Blue-600 (#2563eb)
 - Background: White
 - Text: Slate-900, Slate-600, Slate-500
 - Borders: Slate-200, Slate-300
 
 ### Typographie
+
 - Font Family: Inter (9 poids : 100 à 900)
 - Sizes: xs, sm, base, lg, xl, 2xl, 3xl
 
 ### Composants
+
 - Cartes arrondies (rounded-2xl, rounded-3xl)
 - Boutons rounded-full
 - Borders subtiles
@@ -163,12 +175,15 @@ npm run format
 ## 📝 Notes de Développement
 
 ### Mode Démo
+
 L'application fonctionne en mode démo :
+
 - Toute combinaison email/password est acceptée
 - Les données sont stockées localement
 - Pas de backend requis
 
 ### Limites Actuelles
+
 - Pas de sync cloud
 - Pas de vérification email
 - Pas de récupération de mot de passe

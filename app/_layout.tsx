@@ -1,4 +1,3 @@
-
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, Text, ActivityIndicator } from 'react-native';

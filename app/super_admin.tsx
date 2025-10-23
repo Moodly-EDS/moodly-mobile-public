@@ -7,7 +7,8 @@ import {
     TouchableOpacity,
     Text,
     FlatList,
-    ActivityIndicator
+    ActivityIndicator,
+    TextInput
 } from 'react-native';
 
 // Interface Report
@@ -68,7 +69,9 @@ const Dashboard = () => {
     
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null); 
+    const [error, setError] = useState<string | null>(null);
+    const [searchText, setSearchText] = useState('');
+    const [filteredReports, setFilteredReports] = useState<Report[]>([]); 
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -83,6 +86,7 @@ const Dashboard = () => {
                 if (error) throw error;
 
                 setReports(data || []);
+                setFilteredReports(data || []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Une erreur est survenue');
                 console.log(err); 
@@ -93,6 +97,21 @@ const Dashboard = () => {
 
         fetchReports();
     }, []);
+
+    useEffect(() => {
+        if (searchText.trim() === '') {
+            setFilteredReports(reports);
+        } else {
+            const filtered = reports.filter(report => {
+                const mood = report.mood ? report.mood.toString().toLowerCase() : '';
+                const reasons = report.reasons ? report.reasons.toString().toLowerCase() : '';
+                const searchLower = searchText.toLowerCase();
+                
+                return mood.includes(searchLower) || reasons.includes(searchLower);
+            });
+            setFilteredReports(filtered);
+        }
+    }, [searchText, reports]);
 
 
 
@@ -123,14 +142,25 @@ const Dashboard = () => {
 
                     <View className="bg-white border-2 border-gray-200 rounded-xl p-6 mb-4 shadow-sm">
                         <Text className="text-xl font-bold text-gray-800 mb-4">
-                            Reports ({reports.length})
+                            Reports ({filteredReports.length})
                         </Text>
+                        
+                      
+                        <View className="mb-4">
+                            <TextInput
+                                className="border border-gray-300 rounded-lg px-4 py-3 text-gray-700 bg-white"
+                                placeholder="Rechercher un rapport..."
+                                value={searchText}
+                                onChangeText={setSearchText}
+                                placeholderTextColor="#9CA3AF"
+                            />
+                        </View>
     
                         {loading && <ActivityIndicator size="large" color="#3B82F6" />}
     
                         {error && <Text className="text-red-600 text-center">{error}</Text>}
     
-                        {!loading && !error && reports.map((report) => (
+                        {!loading && !error && filteredReports.map((report) => (
                         <View key={report.id} className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
                             <Text className="text-lg font-bold text-gray-800 mb-2">{report.mood}</Text>
                             <Text className="text-sm text-gray-600 mb-2">{report.reasons}</Text>

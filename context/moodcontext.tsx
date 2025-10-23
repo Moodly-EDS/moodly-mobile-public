@@ -44,7 +44,7 @@ const supabaseReportToMoodEntry = (report: Report): MoodEntry => {
   };
 };
 
-export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const MoodProvider: React.FC<{ children: ReactNode }> = ({children }) => {
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated, user } = useAuth();
@@ -72,6 +72,7 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ) {
         setEntries([]);
       } else {
+        console.error('Failed to load mood entries:', error);
       }
     } finally {
       setLoading(false);

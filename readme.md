@@ -93,13 +93,6 @@ index.tsx
               └─> checkin-success.tsx (après soumission)
 ```
 
-## 💾 Stockage des Données
-
-Les données sont stockées localement avec AsyncStorage :
-
-- `@moodly_onboarding_completed` : État de l'onboarding
-- `@moodly_entries` : Liste des check-ins
-
 ### Structure d'une Entry
 
 ```typescript
@@ -161,33 +154,6 @@ npm run format
 - `@expo/vector-icons` : Icônes
 - `@expo-google-fonts/inter` : Police Inter
 - `nativewind` : Tailwind CSS pour React Native
-
-## 🎯 Prochaines Étapes
-
-- [ ] Ajouter des graphiques pour visualiser les tendances
-- [ ] Notifications push pour rappel de check-in
-- [ ] Export des données en CSV
-- [ ] Insights pour managers (vue agrégée)
-- [ ] Support multilingue (FR/EN)
-- [ ] Mode sombre
-- [ ] Tests unitaires et e2e
-
-## 📝 Notes de Développement
-
-### Mode Démo
-
-L'application fonctionne en mode démo :
-
-- Toute combinaison email/password est acceptée
-- Les données sont stockées localement
-- Pas de backend requis
-
-### Limites Actuelles
-
-- Pas de sync cloud
-- Pas de vérification email
-- Pas de récupération de mot de passe
-- Limitation d'un check-in par jour (peut être contournée en mode dev)
 
 ## 📄 Licence
 

@@ -9,8 +9,11 @@ const DashboardRouter: React.FC = () => {
 
   useEffect(() => {
     if (!loading && user) {
+      console.log('User account_type:', user.account_type);
       if (user.account_type === 'manager') {
         router.replace('/manager-dashboard');
+      } else if (user.account_type === 'superadmin') {
+        router.replace('/super_admin');
       } else {
         router.replace('/employee-dashboard');
       }

@@ -27,10 +27,26 @@ CREATE TABLE public.profiles (
 -- Enable Row Level Security
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+-- Helper function to check if user is superadmin (prevents infinite recursion)
+CREATE OR REPLACE FUNCTION public.is_superadmin()
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE id = auth.uid()
+        AND account_type = 'superadmin'
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Policies for profiles
 CREATE POLICY "Users can view their own profile"
     ON public.profiles FOR SELECT
     USING (auth.uid() = id);
+
+CREATE POLICY "Superadmins can view all profiles"
+    ON public.profiles FOR SELECT
+    USING (public.is_superadmin());
 
 CREATE POLICY "Users can insert their own profile"
     ON public.profiles FOR INSERT

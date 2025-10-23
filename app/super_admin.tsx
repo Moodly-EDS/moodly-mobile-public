@@ -28,17 +28,17 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchAllCounts = async () => {
             try {
-                // Total users
+                
                 const { count: totalCount, error: totalError } = await supabase
                     .from('profiles')
-                    .select('*', { count: 'exact', head: true }); // head: true pour optimiser
+                    .select('*', { count: 'exact', head: true }); 
                 if (totalError) {
                     console.log("Erreur total users:", totalError);
                 } else {
                     setTotalusers(totalCount ?? 0);
                 }
 
-                // Count by roles
+              
                 const roles = ['manager', 'employee', 'superadmin'];
                 const roleCounts = await Promise.all(
                     roles.map(async (role) => {
@@ -68,7 +68,7 @@ const Dashboard = () => {
     
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null); // Corrigé: setError
+    const [error, setError] = useState<string | null>(null); 
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -85,7 +85,7 @@ const Dashboard = () => {
                 setReports(data || []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-                console.log(err); // Corrigé: err au lieu de error
+                console.log(err); 
             } finally {
                 setLoading(false);
             }
@@ -120,7 +120,7 @@ const Dashboard = () => {
                         <Text className="text-2xl font-bold text-center text-red-600">{admin}</Text>
                     </View>
 
-                    {/* SECTION REPORTS */}
+
                     <View className="bg-white border-2 border-gray-200 rounded-xl p-6 mb-4 shadow-sm">
                         <Text className="text-xl font-bold text-gray-800 mb-4">
                             Reports ({reports.length})

@@ -72,6 +72,7 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ) {
         setEntries([]);
       } else {
+        console.error('Failed to load mood entries:', error);
       }
     } finally {
       setLoading(false);
